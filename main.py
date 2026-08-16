@@ -265,7 +265,7 @@ def main():
     "Jashmitha CG": "U05HSJWAYSC",
     "Bhuvana.K": "U05HSSD0UAC",
     "siddhartha.chauhan@hevodata.com": "U04PQ432YSE",
-    "Mrinmayee Deshpande": "U090Y8SG1DJ",
+    "Tanisha Nigam": "U0AG0EH89BP",
     "Nimisha James": "U091LJZ776U",
     "Amruta Patil": "U090QAZSGVC",
     "Kanad Kolhe": "U091LJQEWGG",
