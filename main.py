@@ -167,8 +167,8 @@ def fetch_required_tickets(zendesk):
     print('_' * 40)
     print(f"Current time: {now}")
 
-    three_days_ago = (datetime.now() - timedelta(days=3)).strftime('%Y-%m-%dT%H:%M:%SZ')
-    print("Three days ago time: {}".format(three_days_ago))
+    forty_days_ago = (datetime.now() - timedelta(days=40)).strftime('%Y-%m-%dT%H:%M:%SZ')
+    print("Forty days ago time: {}".format(forty_days_ago))
     print('_' * 40)
 
     group_ids = ["44897999201817", "6338786491161"]
@@ -177,7 +177,7 @@ def fetch_required_tickets(zendesk):
         "type:ticket",
         "status:solved",
         "custom_field_50256840004505:false",
-        f"updated>={three_days_ago}"
+        f"updated>={forty_days_ago}"
     ]
 
     custom_field_values = {
@@ -199,7 +199,7 @@ def fetch_required_tickets(zendesk):
                 )
                 print("executing the query: ")
                 print(query)
-                filterss = [three_days_ago]
+                filterss = [forty_days_ago]
                 response = zendesk.search(get_all_pages=True, query=query)
                 data = response.get('results', [])
                 for event in query.split():
@@ -213,7 +213,7 @@ def fetch_required_tickets(zendesk):
 
     required_tickets = list({ticket['id'] for ticket in tickets})  
 
-    print(f"Tickets updated in the last 30 days: {len(required_tickets)}")
+    print(f"Tickets updated in the last 40 days: {len(required_tickets)}")
     print("List of ticket IDs:")
     print(required_tickets)
     return required_tickets
