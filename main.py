@@ -181,7 +181,7 @@ def fetch_required_tickets(zendesk, option_tags):
         "50124257287449"
     }
 
-    statuses = ["solved", "closed"]
+    statuses = ["solved"]
 
     # option_tags should contain the actual Zendesk
     # dropdown tags for "issue" and "query".
