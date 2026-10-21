@@ -163,12 +163,12 @@ def update_ticket(zendesk, ticket_id, field_data):
 def fetch_required_tickets(zendesk, option_tags):
     
     now = datetime.now(timezone.utc)
-    thirty_days_ago = (
-        now - timedelta(days=30)
+    seven_days_ago = (
+        now - timedelta(days=7)
     ).strftime('%Y-%m-%dT%H:%M:%SZ')
 
     print(f"Current time: {now.isoformat()}")
-    print(f"Thirty days ago: {thirty_days_ago}")
+    print(f"Seven days ago: {seven_days_ago}")
 
     group_ids = [
         "59524180458777",
@@ -193,7 +193,7 @@ def fetch_required_tickets(zendesk, option_tags):
         for status in statuses:
             query = " ".join([
                 "type:ticket",
-                f"updated>={thirty_days_ago}",
+                f"updated>={seven_days_ago}",
                 f"group:{group_id}",
                 f"status:{status}"
             ])
