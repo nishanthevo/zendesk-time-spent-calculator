@@ -167,25 +167,25 @@ def fetch_required_tickets(zendesk):
     print('_' * 40)
     print(f"Current time: {now}")
 
-    seven_days_ago = (datetime.now() - timedelta(days=7)).strftime('%Y-%m-%dT%H:%M:%SZ')
-    print("Seven days ago time: {}".format(seven_days_ago))
+    thirty_days_ago = (datetime.now() - timedelta(days=30)).strftime('%Y-%m-%dT%H:%M:%SZ')
+    print("Thirty days ago time: {}".format(thirty_days_ago))
     print('_' * 40)
 
-    group_ids = ["44897999201817", "6338786491161"]
+    group_ids = ["59524180458777","44897999201817","6338786491161"]
     tickets = []
     base_filters_common = [
         "type:ticket",
         "status:solved",
         "custom_field_50256840004505:false",
-        f"updated>={seven_days_ago}"
+        f"updated>={thirty_days_ago}"
     ]
 
     custom_field_values = {
-        "issue_": ["50124257287449", "47413823762713"],
-        "query_": ["47496875391641", "50107781782681"]
+        "issue_": ["6343861136153"],
+        "query_": ["6343861136281"]
     }
 
-    mapping = {"47496875391641": "query_old_form", "50107781782681": "query_new_form", "50124257287449": "issue_new_form", "47413823762713": "issue_old_form", "44897999201817": "l1 support form", "6338786491161": "general escalation"}
+    mapping = {"50107781782681": "query_new_form", "50124257287449": "issue_new_form"}
 
     for group_id in group_ids:
         for cf_value, form_ids in custom_field_values.items():
@@ -197,23 +197,23 @@ def fetch_required_tickets(zendesk):
                         f"ticket_form_id:{form_id}"
                     ]
                 )
-                print("executing the query: ")
+                print("Executing the query: ")
                 print(query)
-                filterss = [seven_days_ago]
+                filters = [thirty_days_ago]
                 response = zendesk.search(get_all_pages=True, query=query)
                 data = response.get('results', [])
                 for event in query.split():
                     for k in event.split(':'):
                         if k in mapping:
-                            filterss.append(mapping[k])
+                            filters.append(mapping[k])
                 print("Filters applied for this batch are: {data}".format(data=filterss))
-                print("number of results for this batch is: {data}".format(data=len(data)))
+                print("Number of results for this batch is: {data}".format(data=len(data)))
                 print('*' * 40)
                 tickets.extend(data)
 
     required_tickets = list({ticket['id'] for ticket in tickets})  
 
-    print(f"Tickets updated in the last 7 days: {len(required_tickets)}")
+    print(f"Tickets updated in the last 30 days: {len(required_tickets)}")
     print("List of ticket IDs:")
     print(required_tickets)
     return required_tickets
