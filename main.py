@@ -172,31 +172,34 @@ def fetch_required_tickets(zendesk):
     print('_' * 40)
 
     group_ids = ["59524180458777","44897999201817","6338786491161"]
+    
     tickets = []
     base_filters_common = [
         "type:ticket",
-        "status:solved",
         "custom_field_50256840004505:false",
         f"updated>={thirty_days_ago}"
     ]
 
     custom_field_values = {
-        "issue_": ["6343861136153"],
-        "query_": ["6343861136281"]
+        "issue": "6343861136153",
+        "query": "6343861136281"
     }
 
-    mapping = {"50107781782681": "query_new_form", "50124257287449": "issue_new_form"}
+    statuses = ["solved","closed"]
+    form_ids = ["50107781782681","50124257287449"]
 
     for group_id in group_ids:
-        for cf_value, form_ids in custom_field_values.items():
+        for cf_name,cf_id in custom_field_values.items():
             for form_id in form_ids:
-                query = " ".join(
-                    base_filters_common + [
-                        f"group_id:{group_id}",
-                        f"custom_field_6343868668825:{cf_value}",
-                        f"ticket_form_id:{form_id}"
-                    ]
-                )
+                for status in statuses:
+                    query = " ".join(
+                        base_filters_common + [
+                            f"group_id:{group_id}",
+                            f"custom_field_6343868668825:{cf_id}",
+                            f"ticket_form_id:{form_id}",
+                            f"status:{status}"
+                        ]
+                    )
                 print("Executing the query: ")
                 print(query)
                 filters = [thirty_days_ago]
