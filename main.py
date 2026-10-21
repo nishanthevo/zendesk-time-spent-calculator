@@ -1,7 +1,6 @@
 from zdesk import Zendesk
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 import math
-from datetime import timedelta
 import os
 import requests
 from dotenv import load_dotenv
