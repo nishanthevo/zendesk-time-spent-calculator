@@ -2,7 +2,7 @@ name: Run main.py every 6 hours
 
 on:
   schedule:
-    - cron: '51 * * * *'
+    - cron: '*/5 * * * *'
   workflow_dispatch:   
 
 jobs:
