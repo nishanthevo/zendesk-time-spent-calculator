@@ -206,7 +206,7 @@ def fetch_required_tickets(zendesk):
                     for k in event.split(':'):
                         if k in mapping:
                             filters.append(mapping[k])
-                print("Filters applied for this batch are: {data}".format(data=filterss))
+                print("Filters applied for this batch are: {data}".format(data=filters))
                 print("Number of results for this batch is: {data}".format(data=len(data)))
                 print('*' * 40)
                 tickets.extend(data)
