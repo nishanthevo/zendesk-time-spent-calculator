@@ -330,7 +330,7 @@ def main():
             if iter%3 == 0:
                 time.sleep(5)
             response = requests.post(webhook_url_empty_tickets, json=payload, headers=headers)
-            print(f"Sent payload: {payload} | with response: {response.status_code}")
+            print(f"Sent payload (Empty tickets): {payload} | with response: {response.status_code} and response message: {response.text}")
             print("_" * 40)
     
     if failed_tickets:
@@ -352,7 +352,7 @@ def main():
             if iter%3 == 0:
                 time.sleep(5)
             response = requests.post(webhook_url_failed_tickets, json=payload, headers=headers)
-        print(f"Sent payload: {payload} | with response: {response.status_code} and response message: {response.text}")
+        print(f"Sent payload (Failed tickets): {payload} | with response: {response.status_code} and response message: {response.text}")
 
 if __name__ == "__main__":
     main()
