@@ -161,64 +161,87 @@ def update_ticket(zendesk, ticket_id, field_data):
 
     return status
 
-def fetch_required_tickets(zendesk):
-    now = datetime.now()
-    now = now.strftime('%Y-%m-%dT%H:%M:%SZ')
-    print('_' * 40)
-    print(f"Current time: {now}")
-
-    thirty_days_ago = (datetime.now() - timedelta(days=30)).strftime('%Y-%m-%dT%H:%M:%SZ')
-    print("Thirty days ago time: {}".format(thirty_days_ago))
-    print('_' * 40)
-
-    group_ids = ["59524180458777","44897999201817","6338786491161"]
+def fetch_required_tickets(zendesk, option_tags):
     
-    tickets = []
-    base_filters_common = [
-        "type:ticket",
-        "custom_field_50256840004505:false",
-        f"updated>={thirty_days_ago}"
+    now = datetime.now(timezone.utc)
+    thirty_days_ago = (
+        now - timedelta(days=30)
+    ).strftime('%Y-%m-%dT%H:%M:%SZ')
+
+    print(f"Current time: {now.isoformat()}")
+    print(f"Thirty days ago: {thirty_days_ago}")
+
+    group_ids = [
+        "59524180458777",
+        "44897999201817",
+        "6338786491161"
     ]
 
-    custom_field_values = {
-        "issue": "6343861136153",
-        "query": "6343861136281"
+    form_ids = {
+        "50107781782681",
+        "50124257287449"
     }
 
-    statuses = ["solved","closed"]
-    form_ids = ["50107781782681","50124257287449"]
+    statuses = ["solved", "closed"]
+
+    # option_tags should contain the actual Zendesk
+    # dropdown tags for "issue" and "query".
+    required_values = set(option_tags.values())
+
+    required_tickets = set()
 
     for group_id in group_ids:
-        for cf_name,cf_id in custom_field_values.items():
-            for form_id in form_ids:
-                for status in statuses:
-                    query = " ".join(
-                        base_filters_common + [
-                            f"group_id:{group_id}",
-                            f"custom_field_6343868668825:{cf_id}",
-                            f"ticket_form_id:{form_id}",
-                            f"status:{status}"
-                        ]
-                    )
-                print("Executing the query: ")
-                print(query)
-                filters = [thirty_days_ago]
-                response = zendesk.search(get_all_pages=True, query=query)
-                data = response.get('results', [])
-                for event in query.split():
-                    for k in event.split(':'):
-                        if k in mapping:
-                            filters.append(mapping[k])
-                print("Filters applied for this batch are: {data}".format(data=filters))
-                print("Number of results for this batch is: {data}".format(data=len(data)))
-                print('*' * 40)
-                tickets.extend(data)
+        for status in statuses:
+            query = " ".join([
+                "type:ticket",
+                f"updated>={thirty_days_ago}",
+                f"group:{group_id}",
+                f"status:{status}"
+            ])
 
-    required_tickets = list({ticket['id'] for ticket in tickets})  
+            print(f"\nExecuting query: {query}")
 
-    print(f"Tickets updated in the last 30 days: {len(required_tickets)}")
-    print("List of ticket IDs:")
-    print(required_tickets)
+            response = zendesk.search(
+                get_all_pages=True,
+                query=query
+            )
+
+            data = response.get("results", [])
+            matched = 0
+
+            for ticket in data:
+                # Check ticket form
+                if str(ticket.get("ticket_form_id")) not in form_ids:
+                    continue
+
+                # Extract custom fields
+                fields = {
+                    str(field["id"]): field.get("value")
+                    for field in ticket.get("custom_fields", [])
+                }
+
+                # Exclude checked tickets
+                checkbox = fields.get("50256840004505")
+                if checkbox not in (False, "false"):
+                    continue
+
+                # Check issue/query dropdown values
+                category = fields.get("6343868668825")
+                if category not in required_values:
+                    continue
+
+                required_tickets.add(ticket["id"])
+                matched += 1
+
+            print(f"Fetched: {len(data)}")
+            print(f"Matched: {matched}")
+            print("-" * 40)
+
+    required_tickets = sorted(required_tickets)
+
+    print(f"Total unique tickets: {len(required_tickets)}")
+    print("Ticket IDs:", required_tickets)
+
     return required_tickets
 
 def process_ticket(ticket_id):
@@ -248,7 +271,7 @@ def main():
     author_mapping = get_author_mapping(zendesk_client)
  
     custom_status_mapping = get_custom_status_mapping()
-    tickets = fetch_required_tickets(zendesk_client)
+    tickets = fetch_required_tickets(zendesk_client,option_tags={"issue": "issue_","query": "query_"})
     webhook_url_empty_tickets = os.getenv("SLACK_WEBHOOK_URL_EMPTY")
     webhook_url_failed_tickets = os.getenv("SLACK_WEBHOOK_URL_FAILED")
 
